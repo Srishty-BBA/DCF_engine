@@ -78,3 +78,4 @@ document.getElementById("calcBtn").addEventListener("click", function() {
 });
 console.log("Value per share: ₹" + atherTest.perShare.toFixed(2));
 console.log("Actual market price: ₹1033.60");
+});
