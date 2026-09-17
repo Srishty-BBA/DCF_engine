@@ -3,22 +3,57 @@
 <head>
   <title>Ather DCF Explorer</title>
   <script src="script.js" defer></script>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; }
+    .field { margin-bottom: 16px; }
+    .field label { display: flex; justify-content: space-between; font-size: 14px; }
+    .field input[type="range"] { width: 100%; }
+    #result { font-size: 22px; font-weight: bold; margin-top: 20px; }
+  </style>
 </head>
 <body>
   <h1>Ather Energy — DCF Sensitivity</h1>
 
-  <label>Revenue Y0 (₹ Cr): <input type="number" id="rev0" value="3671.76"></label><br>
-  <label>Growth %: <input type="number" id="growth" value="30"></label><br>
-  <label>EBITDA Margin %: <input type="number" id="margin" value="8"></label><br>
-  <label>Tax %: <input type="number" id="tax" value="25"></label><br>
-  <label>Capex % of Rev: <input type="number" id="capex" value="18.8"></label><br>
-  <label>ΔWC % of Rev: <input type="number" id="nwc" value="-3"></label><br>
-  <label>WACC %: <input type="number" id="wacc" value="12"></label><br>
-  <label>Terminal Growth %: <input type="number" id="tg" value="4"></label><br>
-  <label>Net Debt (₹ Cr): <input type="number" id="netdebt" value="-158.93"></label><br>
-  <label>Shares (Cr): <input type="number" id="shares" value="38.3"></label><br>
-
-  <button id="calcBtn">Calculate</button>
+  <div class="field">
+    <label>Revenue Y0 (₹ Cr) <span id="rev0-val">3671.76</span></label>
+    <input type="range" id="rev0" min="1000" max="6000" step="10" value="3671.76">
+  </div>
+  <div class="field">
+    <label>Growth % <span id="growth-val">30</span></label>
+    <input type="range" id="growth" min="0" max="60" step="1" value="30">
+  </div>
+  <div class="field">
+    <label>EBITDA Margin % <span id="margin-val">8</span></label>
+    <input type="range" id="margin" min="-20" max="35" step="0.5" value="8">
+  </div>
+  <div class="field">
+    <label>Tax % <span id="tax-val">25</span></label>
+    <input type="range" id="tax" min="0" max="35" step="1" value="25">
+  </div>
+  <div class="field">
+    <label>Capex % of Rev <span id="capex-val">18.8</span></label>
+    <input type="range" id="capex" min="0" max="30" step="0.5" value="18.8">
+  </div>
+  <div class="field">
+    <label>ΔWC % of Rev <span id="nwc-val">-3</span></label>
+    <input type="range" id="nwc" min="-10" max="10" step="0.5" value="-3">
+  </div>
+  <div class="field">
+    <label>WACC % <span id="wacc-val">12</span></label>
+    <input type="range" id="wacc" min="7" max="20" step="0.25" value="12">
+  </div>
+  <div class="field">
+    <label>Terminal Growth % <span id="tg-val">4</span></label>
+    <input type="range" id="tg" min="1" max="8" step="0.25" value="4">
+  </div>
+  <div class="field">
+    <label>Net Debt (₹ Cr) <span id="netdebt-val">-158.93</span></label>
+    <input type="range" id="netdebt" min="-1000" max="1000" step="10" value="-158.93">
+  </div>
+  <div class="field">
+    <label>Shares (Cr) <span id="shares-val">38.3</span></label>
+    <input type="range" id="shares" min="10" max="100" step="0.1" value="38.3">
+  </div>
 
   <p id="result"></p>
 </body>
