@@ -87,6 +87,7 @@ function recalculate() {
 
   document.getElementById("result").textContent =
     "Value per share: ₹" + r.perShare.toFixed(2);
+  renderSensitivity(vals);
 }
 
 ids.forEach(id => {
