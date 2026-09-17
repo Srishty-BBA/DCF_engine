@@ -40,20 +40,28 @@ function valuePerShare(rev0, growth, margin, tax, capexPct, nwcPct, wacc, tg, ne
   return { enterpriseValue, equityValue, perShare, pvExplicit, pvTerminal, series };
 }
 
-document.getElementById("calcBtn").addEventListener("click", function() {
-  const rev0 = parseFloat(document.getElementById("rev0").value);
-  const growth = parseFloat(document.getElementById("growth").value);
-  const margin = parseFloat(document.getElementById("margin").value);
-  const tax = parseFloat(document.getElementById("tax").value);
-  const capex = parseFloat(document.getElementById("capex").value);
-  const nwc = parseFloat(document.getElementById("nwc").value);
-  const wacc = parseFloat(document.getElementById("wacc").value);
-  const tg = parseFloat(document.getElementById("tg").value);
-  const netdebt = parseFloat(document.getElementById("netdebt").value);
-  const shares = parseFloat(document.getElementById("shares").value);
+const ids = ["rev0","growth","margin","tax","capex","nwc","wacc","tg","netdebt","shares"];
 
-  const r = valuePerShare(rev0, growth, margin, tax, capex, nwc, wacc, tg, netdebt, shares);
+function recalculate() {
+  const vals = {};
+  ids.forEach(id => {
+    const val = parseFloat(document.getElementById(id).value);
+    vals[id] = val;
+    document.getElementById(id + "-val").textContent = val;
+  });
+
+  const r = valuePerShare(
+    vals.rev0, vals.growth, vals.margin, vals.tax,
+    vals.capex, vals.nwc, vals.wacc, vals.tg,
+    vals.netdebt, vals.shares
+  );
 
   document.getElementById("result").textContent =
     "Value per share: ₹" + r.perShare.toFixed(2);
+}
+
+ids.forEach(id => {
+  document.getElementById(id).addEventListener("input", recalculate);
 });
+
+recalculate(); // run once on page load
