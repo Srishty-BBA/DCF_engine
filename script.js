@@ -40,11 +40,7 @@ function valuePerShare(rev0, growth, margin, tax, capexPct, nwcPct, wacc, tg, ne
   return { enterpriseValue, equityValue, perShare, pvExplicit, pvTerminal, series };
 }
 
-const ids = ["rev0","growth","margin","tax","capex","nwc","wacc","tg","netdebt","shares"];
-
-function recalculate() {
-  function renderSensitivity(vals) {
-  // Build 5 WACC values and 5 terminal growth values, centered on current sliders
+function renderSensitivity(vals) {
   const waccSteps = [-1, -0.5, 0, 0.5, 1].map(d => Math.round((vals.wacc + d) * 100) / 100);
   const tgSteps = [-1, -0.5, 0, 0.5, 1].map(d => Math.round((vals.tg + d) * 100) / 100);
 
@@ -56,7 +52,7 @@ function recalculate() {
     html += `<tr><th>WACC=${w}%</th>`;
     tgSteps.forEach(t => {
       if (w <= t) {
-        html += "<td>—</td>"; // invalid: WACC must exceed terminal growth
+        html += "<td>—</td>";
       } else {
         const r = valuePerShare(
           vals.rev0, vals.growth, vals.margin, vals.tax,
@@ -72,6 +68,10 @@ function recalculate() {
 
   document.getElementById("sensTable").innerHTML = html;
 }
+
+const ids = ["rev0","growth","margin","tax","capex","nwc","wacc","tg","netdebt","shares"];
+
+function recalculate() {
   const vals = {};
   ids.forEach(id => {
     const val = parseFloat(document.getElementById(id).value);
@@ -87,6 +87,7 @@ function recalculate() {
 
   document.getElementById("result").textContent =
     "Value per share: ₹" + r.perShare.toFixed(2);
+
   renderSensitivity(vals);
 }
 
@@ -94,4 +95,4 @@ ids.forEach(id => {
   document.getElementById(id).addEventListener("input", recalculate);
 });
 
-recalculate(); // run once on page load
+recalculate();
