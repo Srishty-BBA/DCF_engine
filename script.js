@@ -59,7 +59,7 @@ function renderSensitivity(vals) {
           vals.capex, vals.nwc, w, t, vals.netdebt, vals.shares
         );
         const isCurrent = Math.abs(w - vals.wacc) < 0.001 && Math.abs(t - vals.tg) < 0.001;
-        const style = isCurrent ? "font-weight:bold; background:#dff0d8;" : "";
+        const style = isCurrent ? "font-weight:bold; background:#EFE3C8; color:#16273D;" : "";
         html += `<td style="${style}">₹${r.perShare.toFixed(1)}</td>`;
       }
     });
@@ -69,14 +69,41 @@ function renderSensitivity(vals) {
   document.getElementById("sensTable").innerHTML = html;
 }
 
-const ids = ["rev0","growth","margin","tax","capex","nwc","wacc","tg","netdebt","shares"];
+let fcfChart;
+function renderChart(series) {
+  const labels = series.map(s => "FY+" + s.year);
+  const data = series.map(s => Math.round(s.fcf));
+
+  if (fcfChart) {
+    fcfChart.data.labels = labels;
+    fcfChart.data.datasets[0].data = data;
+    fcfChart.update();
+  } else {
+    const ctx = document.getElementById("fcfChart").getContext("2d");
+    fcfChart = new Chart(ctx, {
+      type: "bar",
+      data: { labels, datasets: [{ data, backgroundColor: "#1F3A5C", borderRadius: 4, maxBarThickness: 46 }] },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => "₹" + c.parsed.y.toLocaleString("en-IN") + " Cr" } } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { grid: { color: "#DCD3BE" } }
+        }
+      }
+    });
+  }
+}
+
+const ids = ["rev0","growth","margin","tax","capex","nwc","wacc","tg","netdebt","shares","mktprice"];
 
 function recalculate() {
   const vals = {};
   ids.forEach(id => {
     const val = parseFloat(document.getElementById(id).value);
     vals[id] = val;
-    document.getElementById(id + "-val").textContent = val;
+    const labelEl = document.getElementById(id + "-val");
+    if (labelEl) labelEl.textContent = val;
   });
 
   const r = valuePerShare(
@@ -85,9 +112,23 @@ function recalculate() {
     vals.netdebt, vals.shares
   );
 
-  document.getElementById("result").textContent =
-    "Value per share: ₹" + r.perShare.toFixed(2);
+  document.getElementById("verdict").textContent = "₹" + r.perShare.toFixed(2);
+  document.getElementById("ev-sub").textContent = "₹" + Math.round(r.enterpriseValue).toLocaleString("en-IN") + " Cr";
+  document.getElementById("eq-sub").textContent = "₹" + Math.round(r.equityValue).toLocaleString("en-IN") + " Cr";
 
+  const upsideEl = document.getElementById("upside-badge");
+  const upside = ((r.perShare - vals.mktprice) / vals.mktprice) * 100;
+  upsideEl.textContent = (upside >= 0 ? "+" : "") + upside.toFixed(1) + "% vs market price";
+  upsideEl.className = "upside " + (upside >= 0 ? "up-pos" : "up-neg");
+
+  const pctExplicit = (r.pvExplicit / r.enterpriseValue) * 100;
+  const pctTerminal = 100 - pctExplicit;
+  document.getElementById("split-explicit").style.width = pctExplicit + "%";
+  document.getElementById("split-terminal").style.width = pctTerminal + "%";
+  document.getElementById("pct-explicit").textContent = pctExplicit.toFixed(0) + "%";
+  document.getElementById("pct-terminal").textContent = pctTerminal.toFixed(0) + "%";
+
+  renderChart(r.series);
   renderSensitivity(vals);
 }
 
