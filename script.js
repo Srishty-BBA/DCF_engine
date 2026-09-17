@@ -97,6 +97,23 @@ function renderChart(series) {
 
 const ids = ["rev0","growth","margin","tax","capex","nwc","wacc","tg","netdebt","shares","mktprice"];
 
+// Baseline values the "Reset to defaults" button restores.
+// If you make this tool generic for other companies, update
+// these to match whatever placeholder values you put in index.html.
+const defaults = {
+  rev0: 3671.76,
+  growth: 30,
+  margin: 8,
+  tax: 25,
+  capex: 18.8,
+  nwc: -3,
+  wacc: 12,
+  tg: 4,
+  netdebt: -158.93,
+  shares: 38.3,
+  mktprice: 1033.60
+};
+
 function recalculate() {
   const vals = {};
   ids.forEach(id => {
@@ -134,6 +151,13 @@ function recalculate() {
 
 ids.forEach(id => {
   document.getElementById(id).addEventListener("input", recalculate);
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  ids.forEach(id => {
+    document.getElementById(id).value = defaults[id];
+  });
+  recalculate();
 });
 
 recalculate();
