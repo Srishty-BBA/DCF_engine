@@ -59,24 +59,22 @@ function valuePerShare(rev0, growth, margin, tax, capexPct, nwcPct, wacc, tg, ne
 // Run with: node script.js   (or paste into a browser console)
 // ============================================================
 
-const atherTest = valuePerShare(
-  3671.76,   // rev0: FY26 revenue, ₹ Cr
-  30,        // growth: assumed forward growth %, moderating from 38.6%
-  8,         // margin: assumed EBITDA margin % (FY26 actual was -11.5%)
-  25,        // tax: %
-  18.8,      // capexPct: matches FY26 capex/sales
-  -3,        // nwcPct: negative — Ather's negative CCC releases cash
-  12,        // wacc: %
-  4,         // tg: terminal growth %
-  -158.93,   // netDebt: Ather is net CASH, so this is negative
-  38.3       // shares: Cr
-);
+document.getElementById("calcBtn").addEventListener("click", function() {
+  const rev0 = parseFloat(document.getElementById("rev0").value);
+  const growth = parseFloat(document.getElementById("growth").value);
+  const margin = parseFloat(document.getElementById("margin").value);
+  const tax = parseFloat(document.getElementById("tax").value);
+  const capex = parseFloat(document.getElementById("capex").value);
+  const nwc = parseFloat(document.getElementById("nwc").value);
+  const wacc = parseFloat(document.getElementById("wacc").value);
+  const tg = parseFloat(document.getElementById("tg").value);
+  const netdebt = parseFloat(document.getElementById("netdebt").value);
+  const shares = parseFloat(document.getElementById("shares").value);
 
-console.log("---- Ather DCF test ----");
-console.log("Year-by-year FCF (₹ Cr):", atherTest.series.map(s => s.fcf.toFixed(1)));
-console.log("PV of explicit FCF:", atherTest.pvExplicit.toFixed(1));
-console.log("PV of terminal value:", atherTest.pvTerminal.toFixed(1));
-console.log("Enterprise value:", atherTest.enterpriseValue.toFixed(1));
-console.log("Equity value:", atherTest.equityValue.toFixed(1));
+  const r = valuePerShare(rev0, growth, margin, tax, capex, nwc, wacc, tg, netdebt, shares);
+
+  document.getElementById("result").textContent =
+    "Value per share: ₹" + r.perShare.toFixed(2);
+});
 console.log("Value per share: ₹" + atherTest.perShare.toFixed(2));
 console.log("Actual market price: ₹1033.60");
