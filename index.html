@@ -2,7 +2,7 @@
 <html>
 <head>
   <title>Ather DCF Explorer</title>
- <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="script.js" defer></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -60,6 +60,14 @@
       width: 16px; height: 16px; border-radius: 50%; background: var(--navy-2);
       cursor: pointer; border: 3px solid var(--panel); box-shadow: 0 0 0 1px var(--navy-2);
     }
+
+    #resetBtn {
+      width: 100%; margin-top: 14px; padding: 10px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--muted); font-size: 13px; cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+    #resetBtn:hover { color: var(--navy-2); border-color: var(--navy-2); }
 
     .stage-top { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; padding: 20px 22px; }
     @media (max-width: 600px) { .stage-top { grid-template-columns: 1fr; } }
@@ -135,6 +143,7 @@
             <input type="number" id="shares" value="38.3"></div>
           <div class="field"><label>Current Market Price (₹)</label>
             <input type="number" id="mktprice" value="1033.60"></div>
+          <button id="resetBtn">Reset to defaults</button>
         </div>
       </div>
     </div>
