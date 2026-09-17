@@ -2,63 +2,183 @@
 <html>
 <head>
   <title>Ather DCF Explorer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
   <script src="script.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; }
-    .field { margin-bottom: 16px; }
-    .field label { display: flex; justify-content: space-between; font-size: 14px; }
-    .field input[type="range"] { width: 100%; }
-    #result { font-size: 22px; font-weight: bold; margin-top: 20px; }
+    :root {
+      --bg: #F3EEE3;
+      --panel: #FBF8F1;
+      --navy: #16273D;
+      --navy-2: #1F3A5C;
+      --border: #DCD3BE;
+      --text: #22262B;
+      --muted: #6B6459;
+      --gold: #A8862F;
+      --green: #3E7A4F;
+      --red: #A8432F;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'IBM Plex Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+    .masthead {
+      background: var(--navy);
+      color: #F3EEE3;
+      margin: 0 -20px 28px;
+      padding: 30px 24px 24px;
+      border-bottom: 3px solid var(--gold);
+    }
+    .masthead h1 { font-family: 'Playfair Display', serif; font-size: 28px; margin: 0 0 6px; }
+    .masthead p { font-size: 13px; color: #C9D2DC; margin: 0; }
+
+    .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+    @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
+    .panel-head { background: var(--navy-2); color: #F3EEE3; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 10px 20px; }
+    .panel-body { padding: 20px 22px; }
+
+    .field { margin-bottom: 18px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; }
+    .field label span:last-child { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--navy-2); }
+    .field input[type="number"] { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; font-family: 'IBM Plex Mono', monospace; background: #fff; }
+
+    input[type="range"] { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; background: var(--border); outline: none; }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--navy-2); cursor: pointer; border: 3px solid var(--panel); box-shadow: 0 0 0 1px var(--navy-2);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%; background: var(--navy-2);
+      cursor: pointer; border: 3px solid var(--panel); box-shadow: 0 0 0 1px var(--navy-2);
+    }
+
+    .stage-top { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; padding: 20px 22px; }
+    @media (max-width: 600px) { .stage-top { grid-template-columns: 1fr; } }
+
+    .label-eyebrow { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin: 0 0 8px; }
+    .verdict-num { font-family: 'Playfair Display', serif; font-size: 46px; font-weight: 700; margin: 0 0 6px; }
+    .verdict-sub { font-size: 13px; color: var(--muted); margin: 0; }
+    .upside { display: inline-block; margin-top: 10px; padding: 5px 12px; border-radius: 5px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 13px; }
+    .up-pos { background: rgba(62,122,79,0.12); color: var(--green); }
+    .up-neg { background: rgba(168,67,47,0.12); color: var(--red); }
+
+    .split-bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin: 14px 0 8px; background: var(--border); }
+    .split-legend { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+    canvas { max-height: 220px; }
+
+    .grid-note { font-size: 12px; color: var(--muted); padding: 14px 22px 0; margin: 0; }
+    table { width: 100%; border-collapse: collapse; font-family: 'IBM Plex Mono', monospace; font-size: 13px; margin: 14px 0 0; }
+    table th, table td { padding: 10px 6px; text-align: center; border: 1px solid var(--border); }
+    table th { color: var(--muted); font-weight: 500; font-size: 11px; background: #EFE9DA; }
+    table td { color: var(--text); background: var(--panel); }
+    .sens-wrap { padding: 0 22px 20px; }
+
+    footer { margin-top: 10px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 14px; }
   </style>
 </head>
 <body>
-  <h1>Ather Energy — DCF Sensitivity</h1>
 
-  <div class="field">
-    <label>Revenue Y0 (₹ Cr) <span id="rev0-val">3671.76</span></label>
-    <input type="range" id="rev0" min="1000" max="6000" step="10" value="3671.76">
+  <div class="masthead">
+    <h1>Ather Energy — DCF Sensitivity</h1>
+    <p>Drag any assumption below and watch intrinsic value recalculate live.</p>
   </div>
-  <div class="field">
-    <label>Growth % <span id="growth-val">30</span></label>
-    <input type="range" id="growth" min="0" max="60" step="1" value="30">
+
+  <div class="layout">
+
+    <!-- CONTROL RAIL -->
+    <div>
+      <div class="panel">
+        <div class="panel-head">Growth &amp; Profitability</div>
+        <div class="panel-body">
+          <div class="field"><label>Revenue Y0 (₹ Cr)</label>
+            <input type="number" id="rev0" value="3671.76"></div>
+          <div class="field"><label>Growth % <span id="growth-val">30</span></label>
+            <input type="range" id="growth" min="0" max="60" step="1" value="30"></div>
+          <div class="field"><label>EBITDA Margin % <span id="margin-val">8</span></label>
+            <input type="range" id="margin" min="-20" max="35" step="0.5" value="8"></div>
+          <div class="field"><label>Tax % <span id="tax-val">25</span></label>
+            <input type="range" id="tax" min="0" max="35" step="1" value="25"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">Capital Efficiency</div>
+        <div class="panel-body">
+          <div class="field"><label>Capex % of Rev <span id="capex-val">18.8</span></label>
+            <input type="range" id="capex" min="0" max="30" step="0.5" value="18.8"></div>
+          <div class="field"><label>ΔWC % of Rev <span id="nwc-val">-3</span></label>
+            <input type="range" id="nwc" min="-10" max="10" step="0.5" value="-3"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">Valuation</div>
+        <div class="panel-body">
+          <div class="field"><label>WACC % <span id="wacc-val">12</span></label>
+            <input type="range" id="wacc" min="7" max="20" step="0.25" value="12"></div>
+          <div class="field"><label>Terminal Growth % <span id="tg-val">4</span></label>
+            <input type="range" id="tg" min="1" max="8" step="0.25" value="4"></div>
+          <div class="field"><label>Net Debt (₹ Cr)</label>
+            <input type="number" id="netdebt" value="-158.93"></div>
+          <div class="field"><label>Shares (Cr)</label>
+            <input type="number" id="shares" value="38.3"></div>
+          <div class="field"><label>Current Market Price (₹)</label>
+            <input type="number" id="mktprice" value="1033.60"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OUTPUT STAGE -->
+    <div>
+      <div class="panel">
+        <div class="stage-top">
+          <div>
+            <p class="label-eyebrow">Intrinsic Value / Share</p>
+            <p class="verdict-num" id="verdict">₹0</p>
+            <p class="verdict-sub">Enterprise value <b id="ev-sub">—</b> · Equity value <b id="eq-sub">—</b></p>
+            <span class="upside" id="upside-badge">—</span>
+          </div>
+          <div>
+            <p class="label-eyebrow">Where the Value Comes From</p>
+            <div class="split-bar">
+              <div id="split-explicit" style="background:var(--green);"></div>
+              <div id="split-terminal" style="background:var(--gold);"></div>
+            </div>
+            <div class="split-legend">
+              <span><span class="dot" style="background:var(--green);"></span>Explicit FCF <b id="pct-explicit">—</b></span>
+              <span><span class="dot" style="background:var(--gold);"></span>Terminal value <b id="pct-terminal">—</b></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">Projected Unlevered Free Cash Flow, Yr 1–5 (₹ Cr)</div>
+        <div class="panel-body">
+          <canvas id="fcfChart"></canvas>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">Sensitivity — Value per Share</div>
+        <p class="grid-note">Rows = WACC · Columns = Terminal Growth · highlighted cell = your current sliders</p>
+        <div class="sens-wrap"><table id="sensTable"></table></div>
+      </div>
+
+      <footer>Prepared by Srishty · Financial Modeling Practice · Not investment advice</footer>
+    </div>
   </div>
-  <div class="field">
-    <label>EBITDA Margin % <span id="margin-val">8</span></label>
-    <input type="range" id="margin" min="-20" max="35" step="0.5" value="8">
-  </div>
-  <div class="field">
-    <label>Tax % <span id="tax-val">25</span></label>
-    <input type="range" id="tax" min="0" max="35" step="1" value="25">
-  </div>
-  <div class="field">
-    <label>Capex % of Rev <span id="capex-val">18.8</span></label>
-    <input type="range" id="capex" min="0" max="30" step="0.5" value="18.8">
-  </div>
-  <div class="field">
-    <label>ΔWC % of Rev <span id="nwc-val">-3</span></label>
-    <input type="range" id="nwc" min="-10" max="10" step="0.5" value="-3">
-  </div>
-  <div class="field">
-    <label>WACC % <span id="wacc-val">12</span></label>
-    <input type="range" id="wacc" min="7" max="20" step="0.25" value="12">
-  </div>
-  <div class="field">
-    <label>Terminal Growth % <span id="tg-val">4</span></label>
-    <input type="range" id="tg" min="1" max="8" step="0.25" value="4">
-  </div>
-  <div class="field">
-    <label>Net Debt (₹ Cr) <span id="netdebt-val">-158.93</span></label>
-    <input type="range" id="netdebt" min="-1000" max="1000" step="10" value="-158.93">
-  </div>
-  <div class="field">
-    <label>Shares (Cr) <span id="shares-val">38.3</span></label>
-    <input type="range" id="shares" min="10" max="100" step="0.1" value="38.3">
-  </div>
-  
-  <h3>Sensitivity: Value per Share</h3>
-  <p style="font-size:13px;">Rows = WACC · Columns = Terminal Growth · bold box = your current sliders</p>
-  <table id="sensTable" border="1" cellpadding="8" style="border-collapse:collapse; font-family:monospace; font-size:13px;"></table>
-  
-  <p id="result"></p>
+
 </body>
 </html>
